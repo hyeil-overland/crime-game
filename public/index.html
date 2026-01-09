@@ -2,75 +2,93 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <title>크라임씬 템플릿</title>
+    <title>크라임씬: 저택 살인 사건</title>
     <style>
         body { background-color: #0a0a0a; color: #d4af37; font-family: 'Apple SD Gothic Neo', sans-serif; margin: 0; overflow: hidden; }
-        .screen { display: none; height: 100vh; width: 100vw; flex-direction: column; justify-content: center; align-items: center; }
+        .screen { display: none; height: 100vh; width: 100vw; flex-direction: column; justify-content: center; align-items: center; text-align: center; }
         
-        /* 메인 화면 */
+        /* 공통 버튼 스타일 */
+        button { padding: 15px 30px; background: #800000; color: white; border: none; cursor: pointer; font-weight: bold; transition: 0.3s; }
+        button:disabled { background: #333 !important; cursor: not-allowed; color: #777; }
+        button:hover:not(:disabled) { background: #a00000; }
+
+        /* [1] 메인 화면 */
         #setup-screen { display: flex; }
-        .input-box { background: #1a1a1a; padding: 40px; border: 2px solid #333; text-align: center; }
-        
-        /* 대기실 */
+        #nicknameInput { padding: 12px; width: 250px; background: #111; color: gold; border: 1px solid #444; margin-bottom: 20px; text-align: center; }
+
+        /* [2] 대기실 화면 */
         #lobby-screen { background: #111; }
-        .player-list { display: flex; gap: 10px; margin: 20px; }
-        .player-tag { background: #222; border: 1px solid gold; padding: 10px 20px; border-radius: 5px; }
+        .player-list-container { display: flex; gap: 10px; margin: 20px 0; min-height: 50px; }
+        .player-tag { background: #222; border: 1px solid #d4af37; padding: 10px 20px; border-radius: 20px; font-size: 0.9rem; }
 
-        /* 게임 화면 레이아웃 */
-        #game-screen { flex-direction: row; padding: 20px; justify-content: center; align-items: flex-start; }
-        #scene-container { position: relative; width: 800px; height: 600px; background: #000; border: 3px solid #444; }
-        #background-img { width: 100%; height: 100%; object-fit: contain; }
-        
-        /* 사이드바 */
-        .sidebar { width: 350px; height: 600px; margin-left: 20px; display: flex; flex-direction: column; gap: 10px; }
-        #role-display { background: #1a1a1a; border: 2px solid #800000; padding: 15px; text-align: center; }
-        #chat-box { flex-grow: 1; background: rgba(0,0,0,0.9); border: 1px solid #333; padding: 10px; overflow-y: auto; font-size: 0.9rem; }
-        
-        /* 버튼 공통 */
-        button { padding: 15px 30px; border: none; font-weight: bold; cursor: pointer; transition: 0.3s; }
-        .btn-main { background: #800000; color: white; }
-        .btn-main:disabled { background: #333; color: #777; cursor: not-allowed; }
+        /* [3] 스토리 화면 */
+        #story-screen { background: black; padding: 40px; }
+        .story-text { font-size: 1.6rem; line-height: 1.8; color: #eee; min-height: 150px; transition: opacity 0.5s; margin-bottom: 50px; }
 
-        /* 클릭 가능한 단서 영역 (투명하게 설정) */
-        .clue-spot { position: absolute; background: rgba(255, 255, 255, 0); cursor: pointer; border: 1px dashed rgba(212, 175, 55, 0.2); }
-        .clue-spot:hover { background: rgba(212, 175, 55, 0.1); border: 1px dashed gold; }
+        /* [4] 브리핑 화면 */
+        #briefing-screen { background: #111; flex-direction: row; align-items: stretch; }
+        .briefing-sidebar { width: 250px; background: #000; border-right: 2px solid #800000; display: flex; flex-direction: column; padding: 20px; gap: 10px; }
+        .briefing-content { flex-grow: 1; padding: 60px; text-align: left; position: relative; background: url('https://www.transparenttextures.com/patterns/black-paper.png'); }
+        .menu-btn { background: #222; color: #d4af37; border: 1px solid #444; padding: 15px; text-align: left; }
+        .menu-btn.active { background: #800000; color: white; border: 1px solid gold; }
+        .timer-display { position: absolute; top: 30px; right: 50px; font-size: 3rem; color: #ff4500; font-family: monospace; }
+
+        /* [5] 게임 화면 */
+        #game-screen { flex-direction: row; padding: 20px; gap: 20px; }
+        #scene-container { position: relative; width: 800px; height: 600px; border: 4px solid #333; }
+        .sidebar { width: 350px; height: 600px; display: flex; flex-direction: column; gap: 10px; }
+        #chat-box { flex-grow: 1; background: rgba(0,0,0,0.9); border: 1px solid #444; padding: 15px; overflow-y: auto; font-size: 0.9rem; color: #ccc; }
     </style>
 </head>
 <body>
 
     <div id="setup-screen" class="screen">
-        <div class="input-box">
-            <h1 style="letter-spacing: 5px;">CRIME SCENE</h1>
-            <input type="text" id="nicknameInput" placeholder="닉네임" style="padding: 10px; width: 200px; background: #000; color: white; border: 1px solid #444;">
-            <button class="btn-main" onclick="joinLobby()">사건 현장 입장</button>
-        </div>
+        <h1 style="font-size: 4rem; letter-spacing: 10px; margin-bottom: 10px;">CRIME SCENE</h1>
+        <p style="color: #888; margin-bottom: 40px;">저택 살인 사건: 잊혀진 초대장</p>
+        <input type="text" id="nicknameInput" placeholder="당신의 이름(닉네임)">
+        <button onclick="joinLobby()">사건 현장 입장</button>
     </div>
 
     <div id="lobby-screen" class="screen">
         <h2>수사본부 대기실</h2>
-        <h3 id="countDisplay">인원 확인 중...</h3>
-        <div id="playerList" class="player-list"></div>
-        <button id="startBtn" class="btn-main" onclick="requestStart()" disabled>인원 대기 중</button>
+        <h3 id="countDisplay" style="color: white;">현재 인원: 0 / 3</h3>
+        <div id="playerList" class="player-list-container">
+            </div>
+        <button id="startBtn" onclick="requestStart()" disabled>인원이 모두 모여야 시작 가능</button>
+    </div>
+
+    <div id="story-screen" class="screen">
+        <div id="story-text-container" class="story-text">
+            사건의 서막이 오릅니다...
+        </div>
+        <button id="nextStoryBtn" onclick="nextStorySlide()">이야기 시작하기</button>
+    </div>
+
+    <div id="briefing-screen" class="screen">
+        <div class="briefing-sidebar">
+            <h2 style="color:white; margin-bottom: 30px;">BRIEFING</h2>
+            <button class="menu-btn active" id="btn-story" onclick="showBriefing('story')">1. 사건 개요</button>
+            <button class="menu-btn" id="btn-role" onclick="showBriefing('role')">2. 나의 역할 (기밀)</button>
+            <button class="menu-btn" id="btn-control" onclick="showBriefing('control')">3. 수사 방법</button>
+        </div>
+        <div class="briefing-content">
+            <div id="timer" class="timer-display">30</div>
+            <div id="briefing-text-area">
+                </div>
+        </div>
     </div>
 
     <div id="game-screen" class="screen">
         <div id="scene-container">
-            <img id="background-img" src="/images/room_bg.jpg">
-            
-            <div class="clue-spot" style="top:200px; left:150px; width:100px; height:100px;" 
-                 onclick="found('금고', '비밀번호가 걸려 있는 낡은 금고다.')"></div>
-            <div class="clue-spot" style="top:400px; left:500px; width:80px; height:80px;" 
-                 onclick="found('메모지', '죽여버리겠다는 내용이 적혀 있다.')"></div>
-        </div>
-
+            <img src="/images/room_bg.jpg" style="width:100%; height:100%; object-fit: cover;">
+            </div>
         <div class="sidebar">
-            <div id="role-display">
-                <div style="font-size: 0.8rem; color: #888;">당신의 역할</div>
-                <div id="roleName" style="font-size: 1.5rem; margin: 5px 0;">대기 중</div>
-                <div id="roleDesc" style="font-size: 0.85rem; color: #aaa;">게임을 시작하면 미션이 부여됩니다.</div>
+            <div style="background:#1a1a1a; padding:15px; border-left: 5px solid #800000;">
+                <small>현재 수사 중인 캐릭터</small>
+                <div id="currentRoleDisplay" style="font-size: 1.2rem; font-weight: bold; color: gold;"></div>
             </div>
             <div id="chat-box"></div>
-            <button onclick="requestEnd()" style="background: #222; color: #888;">게임 종료 (로비로)</button>
+            <button onclick="location.reload()" style="background:#222; font-size: 0.8rem;">게임 포기</button>
         </div>
     </div>
 
@@ -78,68 +96,126 @@
     <script>
         const socket = io();
         let myName = "";
+        let myRole = null;
+        let storyIndex = 0;
 
-        // 화면 전환
-        function show(id) {
+        const storySlides = [
+            "어느 추운 겨울밤, 외딴 산장의 주인으로부터 의문의 초대장이 도착했습니다.",
+            "호화로운 만찬이 끝날 무렵, 갑작스러운 비명소리와 함께 전등이 꺼졌습니다.",
+            "불이 다시 켜졌을 때, 산장 주인은 서재에서 숨진 채 발견되었습니다.",
+            "현장의 문은 안에서 잠겨 있었습니다. 범인은 이 산장에 있는 우리 중 한 명입니다."
+        ];
+
+        function showScreen(id) {
             document.querySelectorAll('.screen').forEach(s => s.style.display = 'none');
             document.getElementById(id).style.display = 'flex';
         }
 
-        // 로직
         function joinLobby() {
-            const nick = document.getElementById('nicknameInput').value;
-            if(nick.trim()) {
-                myName = nick;
-                socket.emit('join', nick);
-                show('lobby-screen');
+            const input = document.getElementById('nicknameInput');
+            if(input.value.trim()) {
+                myName = input.value;
+                socket.emit('join', myName);
+                showScreen('lobby-screen');
             }
         }
 
         function requestStart() { socket.emit('startGame'); }
-        function requestEnd() { if(confirm("대기실로 돌아갈까요?")) socket.emit('endGame'); }
 
-        // 소켓 수신
+        // [이벤트] 인원 및 명단 업데이트
         socket.on('updatePlayerCount', (data) => {
             const btn = document.getElementById('startBtn');
             document.getElementById('countDisplay').innerText = `현재 인원: ${data.current} / ${data.required}`;
             if(data.current === data.required) {
                 btn.disabled = false;
-                btn.innerText = "게임 시작";
+                btn.innerText = "사건 시작하기";
             } else {
                 btn.disabled = true;
-                btn.innerText = "인원 대기 중";
+                btn.innerText = "다른 플레이어를 기다리는 중...";
             }
         });
 
         socket.on('updatePlayerList', (list) => {
-            document.getElementById('playerList').innerHTML = list.map(n => `<div class="player-tag">${n}</div>`).join('');
+            document.getElementById('playerList').innerHTML = list.map(n => `<div class="player-tag">● ${n}</div>`).join('');
         });
 
-        socket.on('assignRole', (role) => {
-            document.getElementById('roleName').innerText = role.name;
-            document.getElementById('roleDesc').innerText = role.desc;
-            if(role.name === "범인") document.getElementById('roleName').style.color = "#ff0000";
+        // [이벤트] 스토리 단계 진입
+        socket.on('startStory', () => {
+            showScreen('story-screen');
+            // 첫 번째 슬라이드는 자동으로 나오지 않고 버튼 클릭으로 시작하게 설정
         });
 
-        socket.on('gameStart', () => show('game-screen'));
-        socket.on('returnToLobby', () => {
-            alert("게임이 종료되어 대기실로 이동합니다.");
-            show('lobby-screen');
-        });
+        function nextStorySlide() {
+            const container = document.getElementById('story-text-container');
+            const btn = document.getElementById('nextStoryBtn');
 
-        // 단서 발견 처리
-        function found(name, desc) {
-            alert(`[단서 획득] ${name}\n${desc}`);
-            socket.emit('clueFound', { playerName: myName, clue: name });
+            if (storyIndex < storySlides.length) {
+                container.style.opacity = 0;
+                setTimeout(() => {
+                    container.innerText = storySlides[storyIndex];
+                    container.style.opacity = 1;
+                    storyIndex++;
+                    btn.innerText = (storyIndex === storySlides.length) ? "내 역할 확인하러 가기" : "다음 이야기...";
+                }, 400);
+            } else {
+                startBriefingPhase();
+            }
         }
+
+        // [이벤트] 브리핑 단계
+        function startBriefingPhase() {
+            showScreen('briefing-screen');
+            showBriefing('story');
+            let timeLeft = 30;
+            const timerObj = document.getElementById('timer');
+            const timerId = setInterval(() => {
+                timeLeft--;
+                timerObj.innerText = timeLeft;
+                if(timeLeft <= 0) {
+                    clearInterval(timerId);
+                    socket.emit('briefingFinished');
+                }
+            }, 1000);
+        }
+
+        function showBriefing(type) {
+            document.querySelectorAll('.menu-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById('btn-' + type).classList.add('active');
+            
+            const area = document.getElementById('briefing-text-area');
+            if(type === 'story') {
+                area.innerHTML = `<h2>사건 개요</h2><p>장소: 산장 서재<br>피해자: 산장 주인<br>사인: 독살 추정<br><br>현장은 완벽한 밀실이었습니다. 여러분은 각자의 비밀을 품고 이 자리에 모였습니다. 이제 진실을 밝혀야 합니다.</p>`;
+            } else if(type === 'role') {
+                area.innerHTML = `<h2 style="color:gold;">나의 캐릭터: ${myRole.name}</h2>
+                                 <p style="font-size:1.1rem;">${myRole.desc}</p>
+                                 <div style="background:#200; padding:20px; border:1px solid #800; margin-top:20px;">
+                                    <h3 style="color:#ff4500; margin-top:0;">비밀 미션 (기밀)</h3>
+                                    <p>${myRole.secret}</p>
+                                    <strong style="color: ${myRole.isCulprit ? 'red' : 'white'}">
+                                        결과: ${myRole.isCulprit ? "당신은 범인입니다." : "당신은 시민입니다."}
+                                    </strong>
+                                 </div>`;
+            } else if(type === 'control') {
+                area.innerHTML = `<h2>수사 및 조작</h2><p>1. 수색: 화면 속 오브젝트를 클릭하여 증거를 수집하세요.<br>2. 공유: 발견된 증거는 자동으로 채팅창에 기록됩니다.<br>3. 토론: 채팅을 통해 서로의 알리바이를 검증하세요.</p>`;
+            }
+        }
+
+        socket.on('assignRole', (role) => { 
+            myRole = role; 
+            document.getElementById('currentRoleDisplay').innerText = role.name;
+        });
+
+        socket.on('gameStart', () => {
+            showScreen('game-screen');
+        });
 
         socket.on('chatAnnounce', (data) => {
             const box = document.getElementById('chat-box');
-            const msg = document.createElement('div');
-            msg.style.padding = "5px 0";
-            msg.innerHTML = data.system ? `<small style="color:gray;">[시스템] ${data.text}</small>` 
-                                       : `<strong>${data.playerName}</strong>님이 <span style="color:gold;">[${data.clue}]</span> 단서를 발견했습니다!`;
-            box.appendChild(msg);
+            const div = document.createElement('div');
+            div.style.padding = "5px 0";
+            div.innerHTML = data.system ? `<small style="color:#777;">[SYSTEM] ${data.text}</small>` 
+                                       : `<strong>${data.playerName}</strong>: <span style="color:gold;">${data.clue}</span> 발견!`;
+            box.appendChild(div);
             box.scrollTop = box.scrollHeight;
         });
     </script>
